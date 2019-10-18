@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
+from tqdm import tqdm
 from BooleanGenome import BooleanGenome, BooleanFunction
 
 """
@@ -58,7 +59,7 @@ class Descent:
         bbest = None
         bfunction = BooleanFunction();
 
-        for i in range(tMax):
+        for i in tqdm(range(tMax)):
             blocal = False
             while(not blocal):
                 vc = BooleanGenome(4, bfunction)

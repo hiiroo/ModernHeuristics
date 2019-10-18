@@ -36,4 +36,4 @@ public class SATDescentTest {
 """
 if __name__ == '__main__':
     d = Descent()
-    d.optimize(500)
+    d.optimize(50)
