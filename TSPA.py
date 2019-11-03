@@ -27,34 +27,47 @@ from tqdm import tqdm
 from TSPInstance import TSPInstance
 from PermutationGenome import PermutationGenome
 
-class TSPDescent:
+class TSPA:
 
 
     """
-    public void run(int tMax, TSPInstance instance) {
-        
+    public void run(int tMax, TSPInstance instance ) {
+
         PermutationGenome best = null;
         int bestFitness = Integer.MAX_VALUE;
-        
+        int temperature = tMax + 1;
+        long startTime=System.currentTimeMillis();
+        PermutationGenome vc = new PermutationGenome( 52, instance );
+
         for ( int t = 0; t < tMax; t++ ) {
-            boolean local = false;
-            PermutationGenome vc = new PermutationGenome(52, instance);
-            
-            while (!local) {
-                if ( vc.getFitness() == 7542 ) break;
-                PermutationGenome vn = vc.getBestNeighbor();
-                if ( vn.getFitness() < vc.getFitness() ) {
-                    vc = vn;                  
+            vc.twoOpt();
+            for ( int i = 0; i < 1000; i++ ) {
+
+                if ( vc.getFitness() == 7542 ) {
+                    break;
                 }
-                else
-                    local = true;
+                PermutationGenome vn = vc.getRandomNeighbor();
+                vn.twoOpt();
+                if ( vn.getFitness() < vc.getFitness() ) {
+                    vc = vn;
+                }
+                else {
+                    int diff = vc.getFitness() - vn.getFitness();
+                    if ( Math.random() < Math.exp( diff / temperature ) ) {
+                        vc = vn;
+                    }
+                }
+                if ( vc.getFitness() < bestFitness ) {
+                    bestFitness = vc.getFitness();
+                    best = vc;
+                }
             }
-            if (vc.getFitness() < bestFitness ) {
-                bestFitness=vc.getFitness();
-                best = vc;
-            }
+            temperature--;
         }
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println( "Simulated Annealing ran for " + elapsedTime + " milliseconds" );
         System.out.println( bestFitness );
+        System.out.println( best );
     }
     """
     @staticmethod
@@ -84,4 +97,4 @@ class TSPDescent:
 if __name__ == "__main__":
     tsp_instance = TSPInstance("berlin52.tsp")
     tsp_instance.read_data()
-    TSPDescent.run(50, tsp_instance)
+    TSPA.run(50, tsp_instance)
