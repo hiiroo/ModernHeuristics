@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from math import exp
+from random import random
 from tqdm import tqdm
 from TSPInstance import TSPInstance
 from PermutationGenome import PermutationGenome
@@ -74,25 +76,31 @@ class TSPA:
     def run(tMax:int, instance:TSPInstance):
         best = None
         best_fitness = 1e10
+        temperature = tMax + 1
+        vc = PermutationGenome.from_instance(52, instance)
 
         for t in tqdm(range(tMax)):
-            local = False
-            vc = PermutationGenome.from_instance(52, instance)
             vc.two_opt()
-            while(not local):
+            
+            for i in range(1000):
                 if vc.fitness == 7542 :  break
-                vn = vc.best_neighbor()
+                vn = vc.random_neighbor() #best_neighbor()
                 vn.two_opt()
                 if(vn.fitness() < vc.fitness()):
                     vc = vn
                 else:
-                    local = True
+                    diff = vc.fitness() - vn.fitness()
+                    if(random() < exp(diff/temperature)):
+                        vc = vn
 
-            if vc.fitness() < best_fitness:
-                best_fitness = vc.fitness()
-                best = vc
-        
+                if(vc.fitness() < best_fitness):
+                    best_fitness = vc.fitness()
+                    best = vc
+            
+            temperature-=1;
+    
         print(best_fitness)
+        print(best)
 
 if __name__ == "__main__":
     tsp_instance = TSPInstance("berlin52.tsp")

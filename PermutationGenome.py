@@ -25,6 +25,7 @@ SOFTWARE.
 """
 
 from __future__ import annotations
+from random import randint
 from copy import deepcopy
 from TSPInstance import TSPInstance
 from PermutationType import PermutationType
@@ -74,7 +75,7 @@ class PermutationGenome:
     }
     """
     @classmethod
-    def from_genome(cls, n)->PermutationGenome:
+    def from_genome(cls, n:PermutationGenome)->PermutationGenome:
         pg = cls()
         pg._chromosome = deepcopy(n.chromosome)
         pg._instance = n.instance
@@ -202,3 +203,17 @@ class PermutationGenome:
                     best = n
         
         return best
+
+
+    """
+    PermutationGenome getRandomNeighbor() {
+        Random r = new Random();
+        PermutationGenome n = new PermutationGenome(this);
+        n.swapGenes(r.nextInt(chromosome.size()), r.nextInt(chromosome.size()));
+        return n;
+    }
+    """
+    def random_neighbor(self):
+        n = PermutationGenome.from_genome(self)
+        n.swap_genes(randint(0, len(self.chromosome)-1), randint(0, len(self.chromosome)-1))
+        return n
