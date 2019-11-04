@@ -42,7 +42,7 @@ class RealNumberGenome:
         for i in range(len(genes)):
             multiplier = 1
             if(random() < 0.5):
-                multiplier = -1;
+                multiplier = -1
             genes[i] = multiplier * random()
         
         rng = cls()
