@@ -27,7 +27,7 @@ from tqdm import tqdm
 from BooleanGenome import BooleanGenome, BooleanFunction
 
 """
-public class Descent {
+public class SATDescent {
     public void run(int tMax) {
 
         BooleanGenome best = null;
@@ -53,7 +53,7 @@ public class Descent {
 }
 
 """
-class Descent:
+class SATDescent:
     @staticmethod
     def optimize(tMax:int):
         bbest = None

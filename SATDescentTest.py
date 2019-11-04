@@ -24,7 +24,7 @@ SOFTWARE.
 
 """
 
-from Descent import Descent
+from SATDescent import SATDescent
 
 """
 public class SATDescentTest {
@@ -35,5 +35,5 @@ public class SATDescentTest {
 }
 """
 if __name__ == '__main__':
-    d = Descent()
+    d = SATDescent()
     d.optimize(50)

@@ -23,64 +23,86 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from math import exp
+from random import random
 from tqdm import tqdm
 from TSPInstance import TSPInstance
 from PermutationGenome import PermutationGenome
 
-class TSPDescent:
+class TSPA:
 
 
     """
-    public void run(int tMax, TSPInstance instance) {
-        
+    public void run(int tMax, TSPInstance instance ) {
+
         PermutationGenome best = null;
         int bestFitness = Integer.MAX_VALUE;
-        
+        int temperature = tMax + 1;
+        long startTime=System.currentTimeMillis();
+        PermutationGenome vc = new PermutationGenome( 52, instance );
+
         for ( int t = 0; t < tMax; t++ ) {
-            boolean local = false;
-            PermutationGenome vc = new PermutationGenome(52, instance);
-            
-            while (!local) {
-                if ( vc.getFitness() == 7542 ) break;
-                PermutationGenome vn = vc.getBestNeighbor();
-                if ( vn.getFitness() < vc.getFitness() ) {
-                    vc = vn;                  
+            vc.twoOpt();
+            for ( int i = 0; i < 1000; i++ ) {
+
+                if ( vc.getFitness() == 7542 ) {
+                    break;
                 }
-                else
-                    local = true;
+                PermutationGenome vn = vc.getRandomNeighbor();
+                vn.twoOpt();
+                if ( vn.getFitness() < vc.getFitness() ) {
+                    vc = vn;
+                }
+                else {
+                    int diff = vc.getFitness() - vn.getFitness();
+                    if ( Math.random() < Math.exp( diff / temperature ) ) {
+                        vc = vn;
+                    }
+                }
+                if ( vc.getFitness() < bestFitness ) {
+                    bestFitness = vc.getFitness();
+                    best = vc;
+                }
             }
-            if (vc.getFitness() < bestFitness ) {
-                bestFitness=vc.getFitness();
-                best = vc;
-            }
+            temperature--;
         }
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println( "Simulated Annealing ran for " + elapsedTime + " milliseconds" );
         System.out.println( bestFitness );
+        System.out.println( best );
     }
     """
     @staticmethod
     def run(tMax:int, instance:TSPInstance):
         best = None
         best_fitness = 1e10
+        temperature = tMax + 1
+        vc = PermutationGenome.from_instance(52, instance)
 
         for t in tqdm(range(tMax)):
-            local = False
-            vc = PermutationGenome.from_instance(52, instance)
-
-            while(not local):
+            vc.two_opt()
+            
+            for i in range(1000):
                 if vc.fitness == 7542 :  break
-                vn = vc.best_neighbor()
+                vn = vc.random_neighbor() #best_neighbor()
+                vn.two_opt()
                 if(vn.fitness() < vc.fitness()):
                     vc = vn
                 else:
-                    local = True
+                    diff = vc.fitness() - vn.fitness()
+                    if(random() < exp(diff/temperature)):
+                        vc = vn
 
-            if vc.fitness() < best_fitness:
-                best_fitness = vc.fitness()
-                best = vc
-        
+                if(vc.fitness() < best_fitness):
+                    best_fitness = vc.fitness()
+                    best = vc
+            
+            temperature-=1;
+    
         print(best_fitness)
+        print(best)
 
 if __name__ == "__main__":
     tsp_instance = TSPInstance("berlin52.tsp")
     tsp_instance.read_data()
-    TSPDescent.run(50, tsp_instance)
+    TSPA.run(50, tsp_instance)

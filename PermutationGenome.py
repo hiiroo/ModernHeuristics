@@ -24,6 +24,8 @@ SOFTWARE.
 
 """
 
+from __future__ import annotations
+from random import randint
 from copy import deepcopy
 from TSPInstance import TSPInstance
 from PermutationType import PermutationType
@@ -45,7 +47,7 @@ class PermutationGenome:
 
 
     @classmethod
-    def from_permutation(cls, permutation:str, instance:TSPInstance):
+    def from_permutation(cls, permutation:str, instance:TSPInstance)->PermutationGenome:
         pg = cls()
         pg._chromosome = PermutationType(permutation)
         pg._instance = instance
@@ -59,7 +61,7 @@ class PermutationGenome:
     }
     """
     @classmethod
-    def from_instance(cls, n:int, instance:TSPInstance):
+    def from_instance(cls, n:int, instance:TSPInstance)->PermutationGenome:
         pg = cls()
         pg._chromosome = PermutationType.from_random(n)
         pg._instance = instance
@@ -73,7 +75,7 @@ class PermutationGenome:
     }
     """
     @classmethod
-    def from_genome(cls, n):
+    def from_genome(cls, n:PermutationGenome)->PermutationGenome:
         pg = cls()
         pg._chromosome = deepcopy(n.chromosome)
         pg._instance = n.instance
@@ -81,7 +83,7 @@ class PermutationGenome:
 
 
     @property 
-    def chromosome(self):
+    def chromosome(self)->PermutationType:
         return self._chromosome
 
     @chromosome.setter
@@ -90,7 +92,7 @@ class PermutationGenome:
 
 
     @property
-    def instance(self):
+    def instance(self)->TSPInstance:
         return self._instance
 
     @instance.setter
@@ -108,8 +110,8 @@ class PermutationGenome:
         return distance;
     }
     """
-    def fitness(self):
-        return sum([self._instance.distance[self._chromosome.gene(i)][self._chromosome.gene(i+1)] for i in range(len(self.chromosome)-1)])
+    def fitness(self)->float:
+        return sum([self.instance.distance[self.chromosome.gene(i)][self.chromosome.gene(i+1)] for i in range(len(self.chromosome)-1)])
 
 
     """
@@ -118,7 +120,54 @@ class PermutationGenome:
     }
     """
     def swap_genes(self, i:int, j:int):
-        self._chromosome.swap_genes(i, j)
+        self.chromosome.swap_genes(i, j)
+
+
+    """
+    public void twoOpt() {
+        boolean modified = true;
+        while (modified) {
+            modified = false;
+
+            for (int i = 0; i < chromosome.size() - 2; i++) {
+                for (int j = i + 2; j < chromosome.size() - 1; j++) {
+                    int d1 = getDistanceBetween(i, i + 1)
+                            + getDistanceBetween(j, j + 1);
+                    int d2 = getDistanceBetween(i, j)
+                            + getDistanceBetween(i + 1, j + 1);
+
+                    // if distance can be shortened, adjust the tour
+                    if (d2 < d1) {
+                        chromosome.reverse(i + 1, j);
+                        modified = true;
+                    }
+                }
+            }
+        }
+    }
+    """
+    def two_opt(self):
+        modified = True
+        while(modified):
+            modified = False
+
+            for i in range(len(self.chromosome)-2):
+                for j in range(len(self.chromosome)-1):
+                    d1 = self.distance(self.chromosome.gene(i), self.chromosome.gene(i+1)) + self.distance(self.chromosome.gene(j), self.chromosome.gene(j+1))
+                    d2 = self.distance(self.chromosome.gene(i), self.chromosome.gene(j)) + self.distance(self.chromosome.gene(i+1), self.chromosome.gene(j+1))
+
+                    if(d2 < d1):
+                        self.chromosome.reverse(d1, d2)
+                        
+
+    """
+    private int getDistanceBetween(int pos1, int pos2) {
+        return instance.getDistance(chromosome.getGene(pos1),
+                chromosome.getGene(pos2));
+    }
+    """
+    def distance(self, pos1:int, pos2:int):
+        return self.instance.distance[pos1][pos2]
 
 
     """
@@ -140,17 +189,31 @@ class PermutationGenome:
         return best;
     }
     """
-    def best_neighbor(self):
+    def best_neighbor(self, tabulist:list=[]):
         best_fitness = 1e10
         best = None
 
-        for i in range(len(self._chromosome)-1):
-            for j in range(len(self._chromosome)):
+        for i in range(len(self.chromosome)-1):
+            for j in range(len(self.chromosome)):
                 n = PermutationGenome.from_genome(self)
                 n.swap_genes(i, j)
                 newfitness = n.fitness()
-                if(newfitness < best_fitness):
+                if(newfitness < best_fitness and newfitness not in tabulist):#Why do we check fitness as tabu? 
                     best_fitness = newfitness
                     best = n
         
         return best
+
+
+    """
+    PermutationGenome getRandomNeighbor() {
+        Random r = new Random();
+        PermutationGenome n = new PermutationGenome(this);
+        n.swapGenes(r.nextInt(chromosome.size()), r.nextInt(chromosome.size()));
+        return n;
+    }
+    """
+    def random_neighbor(self):
+        n = PermutationGenome.from_genome(self)
+        n.swap_genes(randint(0, len(self.chromosome)-1), randint(0, len(self.chromosome)-1))
+        return n

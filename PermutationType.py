@@ -24,6 +24,7 @@ SOFTWARE.
 
 """
 
+from __future__ import annotations
 from random import shuffle, randint
 
 class PermutationType:
@@ -36,9 +37,10 @@ class PermutationType:
     def __init__(self, permutation:list):
         self._permutation = permutation
 
+    # T = TypeVar('PermutationType', bound=PermutationType)
 
     @property
-    def permutation(self):
+    def permutation(self)->list:
         return self._permutation #If permutation should not be accessed anyway, it can be replaced by a pass
 
     @permutation.setter
@@ -56,7 +58,7 @@ class PermutationType:
     }
     """
     @classmethod
-    def from_string(cls, permutation:str):
+    def from_string(cls, permutation:str)->PermutationType:
         numbers = permutation.split()
         return cls([int(number)-1 for number in numbers])
 
@@ -78,7 +80,7 @@ class PermutationType:
     }
     """
     @classmethod
-    def from_random(cls, n):
+    def from_random(cls, n:int)->PermutationType:
         l = [i for i in range(n)]
         for i in range(n):
             p1 = randint(0, n-1)
@@ -93,7 +95,7 @@ class PermutationType:
     }
     """
     @classmethod
-    def from_chromosome(cls, chromosome):
+    def from_chromosome(cls, chromosome)->PermutationType:
         return cls(list(chromosome))
 
 
@@ -117,7 +119,6 @@ class PermutationType:
     def __len__(self):
         return len(self._permutation)
 
-
     """
     void swapGenes( int i, int j ) {
         int temp = permutation[i];
@@ -125,5 +126,18 @@ class PermutationType:
         permutation[j] = temp;
     }
     """
-    def swap_genes(self, i, j):
+    def swap_genes(self, i:int, j:int):
         self._permutation[i], self._permutation[j] = self._permutation[j], self._permutation[i]
+    
+    """
+    void reverse( int i, int j ) {
+        while ( i < j ) {
+            swapGenes( i++, j-- );
+        }
+    }
+    """
+    def reverse(self, i:int, j:int):
+        while(i<j):
+            i+=1
+            j-=1
+            swap_genes(i, j)
