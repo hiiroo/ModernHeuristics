@@ -33,27 +33,26 @@ class NLPProblem3D:
 
     @property
     def dimension(self):
-        3
+        return 3
 
     @dimension.setter
-    def dimension_setter(self):
+    def dimension(self, value):
         pass
 
     def value(self, vars:List[float]):
         if(self.is_valid(vars)):
             return vars[0]*vars[1] + vars[1]*vars[2]
 
-        return inf
+        return -inf
 
     def is_valid(self, vars:List[float]):
-        sum = vars[0]**2 - vars[1]**2 + vars[2]**2
-        if(sum < 2):
+        sumv = vars[0]**2 - vars[1]**2 + vars[2]**2
+        if(sumv < 2):
             return False
 
-        squared_sum = sum(map(lambda x: x**2, vars)) #vars[0]**2 + vars[1]**2 + vars[2]**2
+        squared_sum = vars[0]**2 + vars[1]**2 + vars[2]**2 #sum(map(lambda x: x**2, vars)) #vars[0]**2 + vars[1]**2 + vars[2]**2
 
         if(squared_sum > 10):
             return False
 
         return True
-        

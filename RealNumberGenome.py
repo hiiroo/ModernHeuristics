@@ -24,6 +24,7 @@ SOFTWARE.
 """
 
 from __future__ import annotations
+from typing import List
 from copy import copy
 from math import inf
 from random import random
@@ -33,7 +34,7 @@ class RealNumberGenome:
 
     def __init__(self):
         self._genes = None
-        self.instance = None
+        self._instance = None
 
 
     @classmethod
@@ -46,23 +47,39 @@ class RealNumberGenome:
             genes[i] = multiplier * random()
         
         rng = cls()
-        rng.genes = genes
-        rng.instance = instance
+        rng._genes = genes
+        rng._instance = instance
         return rng
         
 
     @classmethod
     def from_genome(cls, g:RealNumberGenome)->RealNumberGenome:
         rng = cls()
-        rng.genes = copy(g._genes)
-        rng.instance = g.instance
+        rng._genes = copy(g._genes)
+        rng._instance = g._instance
+        return rng
 
+    @property 
+    def genes(self)->List[float]:
+        return self._genes
+
+    @genes.setter
+    def genes(self, value:List[float]):
+        pass
+
+    @property
+    def instance(self)->NLPProblem3D:
+        return self._instance
+
+    @instance.setter
+    def instance(self, value:NLPProblem3D):
+        pass
     
-    def fitness(self):
+    def fitness(self)->float:
         return self.instance.value(self.genes)
 
     
-    def best_neighbor(self, epsilon:float):
+    def best_neighbor(self, epsilon:float)->RealNumberGenome:
         best_fitness = -inf
         best = None
 
@@ -89,4 +106,4 @@ class RealNumberGenome:
 
 
     def __str__(self):
-        return " ".join(["{.6f}".format(g) for g in self.gene])
+        return " ".join(["{:6.6f}".format(g) for g in self.genes])

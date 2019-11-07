@@ -33,17 +33,17 @@ class NLPProblem2D:
 
     @property
     def dimension(self):
-        2
+        return 2
 
     @dimension.setter
-    def dimension_setter(self):
+    def dimension(self, value):
         pass
 
     def value(self, vars:List[float]):
         if(self.is_valid(vars)):
             return sum(vars)
 
-        return inf
+        return -inf
 
     def is_valid(self, vars:List[float]):
         if(vars[0] < 0 or vars[1] < 0):
@@ -55,4 +55,3 @@ class NLPProblem2D:
             return False
 
         return True
-        
