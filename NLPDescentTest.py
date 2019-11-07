@@ -23,3 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from NLPProblem3D import NLPProblem3D
+from NLPDescent import NLPDescent
+
+if __name__ == "__main__":
+    NLPDescent.run(10000, NLPProblem3D())

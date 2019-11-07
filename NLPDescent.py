@@ -23,65 +23,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from math import inf
 from tqdm import tqdm
-from TSPInstance import TSPInstance
-from PermutationGenome import PermutationGenome
+from NLPProblem3D import NLPProblem3D
+from RealNumberGenome import RealNumberGenome
 
-class TSPDescent:
+class NLPDescent:
 
 
     """
-    public void run(int tMax, TSPInstance instance) {
+    public void run(int tMax, NLPProblem3D instance) {
         
-        PermutationGenome best = null;
-        int bestFitness = Integer.MAX_VALUE;
+        RealNumberGenome best = null;
+        double bestFitness = Double.NEGATIVE_INFINITY;
         
         for ( int t = 0; t < tMax; t++ ) {
             boolean local = false;
-            PermutationGenome vc = new PermutationGenome(52, instance);
-            
+            RealNumberGenome vc = new RealNumberGenome(instance);
             while (!local) {
-                if ( vc.getFitness() == 7542 ) break;
-                PermutationGenome vn = vc.getBestNeighbor();
-                if ( vn.getFitness() < vc.getFitness() ) {
-                    vc = vn;                  
+                RealNumberGenome vn = vc.getBestNeighbor(0.1);
+                if ( vn!= null && vn.getFitness() > vc.getFitness() ) {
+                    vc = vn;        
                 }
                 else
                     local = true;
             }
-            if (vc.getFitness() < bestFitness ) {
+            if (vc.getFitness() > bestFitness ) {
                 bestFitness=vc.getFitness();
                 best = vc;
             }
         }
         System.out.println( bestFitness );
+        System.out.println( best );
     }
     """
     @staticmethod
-    def run(tMax:int, instance:TSPInstance):
+    def run(tMax:int, instance:NLPProblem3D):
         best = None
-        best_fitness = 1e10
+        best_fitness = -inf
 
         for t in tqdm(range(tMax)):
             local = False
-            vc = PermutationGenome.from_instance(52, instance)
-            vc.two_opt()
+            vc = RealNumberGenome.from_instance(instance)
             while(not local):
-                if vc.fitness == 7542 :  break
-                vn = vc.best_neighbor()
-                vn.two_opt()
-                if(vn.fitness() < vc.fitness()):
+                vn = vc.best_neighbor(1e-1)
+                if((vn != None) and (vn.fitness() > vc.fitness())):
                     vc = vn
                 else:
                     local = True
 
-            if vc.fitness() < best_fitness:
+            if(vc.fitness() > best_fitness):
                 best_fitness = vc.fitness()
                 best = vc
-        
-        print(best_fitness)
 
-if __name__ == "__main__":
-    tsp_instance = TSPInstance("berlin52.tsp")
-    tsp_instance.read_data()
-    TSPDescent.run(50, tsp_instance)
+        print(best_fitness)
+        print(best)
