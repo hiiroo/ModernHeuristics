@@ -55,3 +55,4 @@ class NLPProblem2D:
             return False
 
         return True
+        

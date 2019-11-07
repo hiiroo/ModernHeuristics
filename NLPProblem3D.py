@@ -56,3 +56,4 @@ class NLPProblem3D:
             return False
 
         return True
+        
