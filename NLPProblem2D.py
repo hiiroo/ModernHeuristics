@@ -23,15 +23,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from TSPInstance import TSPInstance
-from TSPDescent import TSPDescent
-from TSPA import TSPA
-from TSPTS import TSPTS
+from typing import List
+from math import inf
 
+"""
+2D problem from https://www.wikiwand.com/en/Nonlinear_programming
+"""
+class NLPProblem2D:
 
-if __name__ == "__main__":
-    instance = TSPInstance("berlin52.tsp")
+    @property
+    def dimension(self):
+        return 2
 
-    TSPDescent.run(100, instance)
-    TSPA.run(1000, instance)
-    TSPTS.run(30000, instance, 400)
+    @dimension.setter
+    def dimension(self, value):
+        pass
+
+    def value(self, vars:List[float]):
+        if(self.is_valid(vars)):
+            return sum(vars)
+
+        return -inf
+
+    def is_valid(self, vars:List[float]):
+        if(vars[0] < 0 or vars[1] < 0):
+            return False
+
+        squared_sum = vars[0]**2 + vars[1]**2
+
+        if(squared_sum < 1  or squared_sum > 2):
+            return False
+
+        return True
