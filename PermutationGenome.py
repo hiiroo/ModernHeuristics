@@ -25,6 +25,7 @@ SOFTWARE.
 """
 
 from __future__ import annotations
+from typing import Dict
 from random import randint
 from copy import deepcopy
 from TSPInstance import TSPInstance
@@ -217,3 +218,64 @@ class PermutationGenome:
         n = PermutationGenome.from_genome(self)
         n.swap_genes(randint(0, len(self.chromosome)-1), randint(0, len(self.chromosome)-1))
         return n
+
+
+    """
+    PermutationGenome getRandomNeighborNotInTabu( int nTries, List<AbstractMap.SimpleEntry<Integer, Integer>> tabuList ) {
+        int bestNeighborFitness = Integer.MAX_VALUE;
+        PermutationGenome best = null;
+        Random r = new Random();
+
+        int bestPos1 = 0, bestPos2 = 0;
+        for ( int i = 0; i < nTries; i++ ) {
+            PermutationGenome n = new PermutationGenome( this );
+            int pos1, pos2;
+            while ( true ) {
+                pos1 = r.nextInt( chromosome.size() );
+                pos2 = r.nextInt( chromosome.size() );
+                AbstractMap.SimpleEntry<Integer, Integer> item = new AbstractMap.SimpleEntry( pos1, pos2 );
+                if ( !tabuList.contains( item ) ) {
+                    break;
+                }
+            }
+
+            n.swapGenes( pos1, pos2 );
+            int newfitness = n.getFitness();
+            if ( newfitness < bestNeighborFitness ) {
+                bestNeighborFitness = newfitness;
+                best = n;
+                bestPos1 = pos1;
+                bestPos2 = pos2;
+            }
+
+        }
+        tabuList.add( new AbstractMap.SimpleEntry( bestPos1, bestPos2 ) );
+        return best;
+    }
+    """
+    def random_neighbor_not_in_tabu(self, nTries:int, tabuList:Dict)->PermutationGenome:
+        best_neighbor_fitness = 1e10
+        best = None
+
+        best_pos_1, best_pos_2 = 0, 0
+        for i in range(nTries):
+            n = PermutationGenome.from_genome(self)
+            pos1, pos2 = 0, 0
+            while True:
+                pos1 = randint(0, len(self.chromosome))
+                pos2 = randint(0, len(self.chromosome))
+                if pos1 not in tabuList:
+                    break
+            
+            n.swap_genes(pos1, pos2)
+            new_fitness = n.fitness()
+            if(new_fitness < best_neighbor_fitness):
+                best_neighbor_fitness = new_fitness
+                best = n
+                best_pos_1 = pos1
+                best_pos_2 = pos2
+
+        tabuList[best_pos_1] = best_pos_2
+        return best
+
+
