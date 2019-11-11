@@ -24,8 +24,8 @@ SOFTWARE.
 
 """
 from tqdm import tqdm
-from BooleanGenome import BooleanGenome, BooleanFunction
-from CNFFunction import CNFFunction
+from BooleanGenome import BooleanGenome, BooleanFunction, CNFFunction
+# from CNFFunction import CNFFunction
 
 """
 public void run( int tMax, CNFFunction instance ) {
@@ -70,9 +70,6 @@ class SATDescent:
             while(not blocal):
                 vn = vc.best_neighbor()
                 
-                if(vn is not None):
-                    bbest = vn
-                    break
                 if(vn.fitness() < vc.fitness()):
                     vc = vn
                     if(vc.fitness() < best_fitness):
@@ -82,5 +79,6 @@ class SATDescent:
                     blocal = True
         
         print("Hill Climbing")
+        print(best_fitness)
         print(bbest)
 
