@@ -96,7 +96,7 @@ class TSPA:
                     if(random() < exp(diff/temperature)):
                         vc = vn
             
-            temperature-=1;
+            temperature-=1
     
         print("Simulated Annealing")
         print(best_fitness)

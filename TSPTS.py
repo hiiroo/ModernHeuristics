@@ -91,6 +91,7 @@ class TSPTS:
 
         print("Tabu Search")
         print(best_fitness)
+        print(best)
 
 if __name__ == "__main__":
     tsp_instance = TSPInstance("berlin52.tsp")
