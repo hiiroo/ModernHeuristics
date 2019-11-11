@@ -33,12 +33,12 @@ class TSPA:
 
 
     """
-    public void run(int tMax, TSPInstance instance ) {
+    public void run( int tMax, TSPInstance instance ) {
 
         PermutationGenome best = null;
         int bestFitness = Integer.MAX_VALUE;
         int temperature = tMax + 1;
-        long startTime=System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         PermutationGenome vc = new PermutationGenome( 52, instance );
 
         for ( int t = 0; t < tMax; t++ ) {
@@ -52,6 +52,10 @@ class TSPA:
                 vn.twoOpt();
                 if ( vn.getFitness() < vc.getFitness() ) {
                     vc = vn;
+                    if ( vc.getFitness() < bestFitness ) {
+                        bestFitness = vc.getFitness();
+                        best = vc;
+                    }
                 }
                 else {
                     int diff = vc.getFitness() - vn.getFitness();
@@ -59,16 +63,12 @@ class TSPA:
                         vc = vn;
                     }
                 }
-                if ( vc.getFitness() < bestFitness ) {
-                    bestFitness = vc.getFitness();
-                    best = vc;
-                }
             }
             temperature--;
         }
         long elapsedTime = System.currentTimeMillis() - startTime;
-        System.out.println( "Simulated Annealing ran for " + elapsedTime + " milliseconds" );
-        System.out.println( bestFitness );
+        System.out.println( "\nSimulated Annealing ran for " + elapsedTime + " milliseconds" );
+        System.out.println( "Best Fitness: " + bestFitness );
         System.out.println( best );
     }
     """
@@ -88,17 +88,17 @@ class TSPA:
                 vn.two_opt()
                 if(vn.fitness() < vc.fitness()):
                     vc = vn
+                    if(vc.fitness() < best_fitness):
+                        best_fitness = vc.fitness()
+                        best = vc
                 else:
                     diff = vc.fitness() - vn.fitness()
                     if(random() < exp(diff/temperature)):
                         vc = vn
-
-                if(vc.fitness() < best_fitness):
-                    best_fitness = vc.fitness()
-                    best = vc
             
             temperature-=1;
     
+        print("Simulated Annealing")
         print(best_fitness)
         print(best)
 

@@ -100,6 +100,8 @@ class PermutationGenome:
     def instance_setter(self, v):
         pass
 
+    def __str__(self):
+        return str(self.chromosome)
 
     """
     int getFitness() {
