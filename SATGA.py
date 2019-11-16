@@ -26,14 +26,14 @@ SOFTWARE.
 
 from random import random, randint, shuffle
 from typing import List
+from tqdm import tqdm
 from BooleanGenome import BooleanGenome, CNFFunction
 
 
 class SATGA:
 
     def __init__(self):
-        self.population:List[BooleanGenome] = []
-
+        self.population: List[BooleanGenome] = []
 
     """
     private double[] constructRouletteWheel( int populationSize ) {
@@ -51,20 +51,21 @@ class SATGA:
         return probabilities;
     }
     """
-    def construct_roulette_wheel(self, population_size:int)->List[float]:
-        sum = 0.0;
+
+    def construct_roulette_wheel(self, population_size: int) -> List[float]:
+        sum = 0.0
 
         for pop_count in range(population_size):
-            sum+=1/(self.population[pop_count].fitness())
+            sum += 1/(self.population[pop_count].fitness())
 
-        probabilities:List[float] = []
+        probabilities: List[float] = []
         probabilities[0] = 0
 
         for pop_count in range(population_size - 1):
-            probabilities[pop_count + 1] = probabilities[pop_count] + (1/self.population[pop_count].fitness)/sum
+            probabilities[pop_count + 1] = probabilities[pop_count] + \
+                (1/self.population[pop_count].fitness)/sum
 
         return probabilities
-
 
     """
     private List<BooleanGenome> rouletteWheelSelection( int populationSize ) {
@@ -90,9 +91,10 @@ class SATGA:
         return matingPool;
     }
     """
-    def roulette_wheel_selection(self, population_size:int)->List[BooleanGenome]:
-        probabilities = construct_roulette_wheel(population_size)
-        mating_pool:List[BooleanGenome] = []
+
+    def roulette_wheel_selection(self, population_size: int) -> List[BooleanGenome]:
+        probabilities = self.construct_roulette_wheel(population_size)
+        mating_pool: List[BooleanGenome] = []
 
         for prob_count in range(population_size):
             if(probabilities[prob_count] > random()):
@@ -105,7 +107,6 @@ class SATGA:
         mating_pool.append(self.population[selected_parent])
 
         return mating_pool
-
 
     """
     private List<BooleanGenome> SUS( int populationSize ) {
@@ -134,10 +135,11 @@ class SATGA:
         return matingPool;
     }
     """
-    def SUS(self, population_size:int)->List[BooleanGenome]:
+
+    def SUS(self, population_size: int) -> List[BooleanGenome]:
         probabilities = self.construct_roulette_wheel(population_size)
 
-        mating_pool:List[BooleanGenome] = []
+        mating_pool: List[BooleanGenome] = []
         rand = (randint(0, population_size)/population_size)/population_size
 
         for pop_count in population_size:
@@ -174,12 +176,13 @@ class SATGA:
         return matingPool;
     }
     """
-    def tournament_selection(self, tournament_size:int, population_size:int)->List[BooleanGenome]:
-        mating_pool:List[BooleanGenome] = []
+
+    def tournament_selection(self, tournament_size: int, population_size: int) -> List[BooleanGenome]:
+        mating_pool: List[BooleanGenome] = []
 
         for i in range(population_size):
             best_fitness = 1e10
-            best_candidate:BooleanGenome = None
+            best_candidate: BooleanGenome = None
 
             for j in range(tournament_size):
                 index = randint(0, tournament_size)
@@ -191,7 +194,6 @@ class SATGA:
             mating_pool.append(best_candidate)
 
         return mating_pool
-
 
     """
     private void crossover( BooleanGenome parent1, BooleanGenome parent2, List<BooleanGenome> population ) {
@@ -209,72 +211,67 @@ class SATGA:
         population.add( child2 );
     }
     """
-    def crossover(self, parent1:BooleanGenome, parent2:BooleanGenome, population:List[BooleanGenome]):
+
+    def crossover(self, parent1: BooleanGenome, parent2: BooleanGenome, population: List[BooleanGenome]):
         crossover_point = randint(0, len(parent1)-1)
-        child1 = BooleanGenome(parent1)
+        child1 = BooleanGenome.from_BooleanGenome(parent1)
 
         for i in range(crossover_point+1, len(parent1)):
-            child1.gene(i, parent2.gene(i))
+            child1.set_gene(i=i, value=parent2.get_gene(i))
 
-        child2 = BooleanGenome(parent2)
+        child2 = BooleanGenome.from_BooleanGenome(parent2)
 
         for i in range(crossover_point+1, len(parent2)):
-            child2.gene(i, parent1.gene(i))
+            child2.set_gene(i=i, value=parent1.get_gene(i))
 
         population.append(child1)
         population.append(child2)
 
+    def run(self, n_generations: int, population_size: int, crossover_rate: float, mutation_rate: float, instance: CNFFunction):
+        self.population: List[BooleanGenome] = []
 
-    def run(self, n_generations:int, population_size:int, crossover_rate:float, mutation_rate:float, instance:CNFFunction):
-        self.population:List[BooleanGenome] = []
-        
         for i in range(population_size):
             gene = BooleanGenome(instance)
             self.population.append(gene)
 
-        for i in range(n_generations):
+        for i in tqdm(range(n_generations)):
             mating_pool = self.tournament_selection(10, population_size)
 
             shuffle(mating_pool)
             self.population.clear()
             # crossover
-            for pool_count in range(len(mating_pool)):
+            for pool_count in range(0, len(mating_pool), 2):
                 rand = random()
                 if(rand < crossover_rate):
-                    self.crossover(mating_pool[pool_count], mating_pool[pool_count + 1], self.population)
+                    self.crossover(
+                        mating_pool[pool_count], mating_pool[pool_count + 1], self.population)
                 else:
                     self.population.append(mating_pool[pool_count])
                     self.population.append(mating_pool[pool_count + 1])
             # mutation
             for pop_count in range(len(mating_pool)):
                 for gene_count in range(instance.n_variables):
-                    if(random < mutation_rate):
+                    if(random() < mutation_rate):
                         self.population[pop_count].flip_gene(gene_count)
 
             best_fitness = 1e10
-            best:BooleanGenome = None
+            best: BooleanGenome = None
             for pop_count in range(len(self.population)):
                 if(self.population[pop_count].fitness() < best_fitness):
                     best_fitness = self.population[pop_count].fitness()
                     best = self.population[pop_count]
 
-            del self.population[randint(0, len(self.population))]
+            del self.population[randint(0, len(self.population)-1)]
             self.population.append(best)
-            
+
             if(best_fitness == 0):
                 break
-        
 
+        for pop_count in range(len(self.population)):
+            if(self.population[pop_count].fitness() < best_fitness):
+                best_fitness = self.population[i].fitness()
+                best = self.population[i]
 
-
-
-
-
-
-
-
-
-
-
-
-
+        print("SAT in GA")
+        print(best_fitness)
+        print(best)

@@ -218,14 +218,17 @@ class BooleanGenome:
     def value_setter(self, v):
         pass
 
-    @property
-    def gene(self, i:int)->bool:
+    # @property
+    def get_gene(self, i:int)->bool:
         return self._genes[i]
 
-    @gene.setter
-    def gene(self, i:int, value:bool):
+    # @gene.setter
+    def set_gene(self, i:int, value:bool):
         self._genes[i] = value
         self._is_changed = True
+
+    def __len__(self):
+        return len(self._genes)
 
     """
     @Override
