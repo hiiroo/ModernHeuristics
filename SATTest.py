@@ -24,16 +24,18 @@ SOFTWARE.
 
 """
 
+# from CNFFunction import CNFFunction
+from BooleanGenome import CNFFunction
 from SATDescent import SATDescent
+from SATSA import SATSA
+from SATTS import SATTS
+from SATGA import SATGA
 
-"""
-public class SATDescentTest {
-    public static void main( String[] args ) {
-        Descent d = new Descent();
-        d.run( 500 );
-    }
-}
-"""
+
 if __name__ == '__main__':
-    d = SATDescent()
-    d.optimize(50)
+    cnf_function = CNFFunction("fpga10_8_sat_rcr.cnf")
+
+    # SATDescent.run(100, cnf_function)
+    # SATSA.run(20, cnf_function)
+    # SATTS.run(10000, cnf_function, 50)
+    SATGA().run(1000, 100, 0.9, 0.01, cnf_function)

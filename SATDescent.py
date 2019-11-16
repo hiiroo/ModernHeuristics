@@ -24,55 +24,61 @@ SOFTWARE.
 
 """
 from tqdm import tqdm
-from BooleanGenome import BooleanGenome, BooleanFunction
+from BooleanGenome import BooleanGenome, BooleanFunction, CNFFunction
+# from CNFFunction import CNFFunction
 
 """
-public class SATDescent {
-    public void run(int tMax) {
+public void run( int tMax, CNFFunction instance ) {
 
-        BooleanGenome best = null;
-        BooleanFunction function = new BooleanFunction();
-        for ( int t = 0; t < tMax; t++ ) {
-            boolean local = false;
-            while (!local) {
-                BooleanGenome vc = new BooleanGenome(4, function );
-                if ( vc.getValue() ) break;
-                BooleanGenome vn = vc.getBestNeighbor();
-                if ( vn!=null ) {
-                    best= vn;
-                    break;
+    BooleanGenome best = null;
+    int bestFitness = Integer.MAX_VALUE;
+    long startTime = System.currentTimeMillis();
+
+    for ( int t = 0; t < tMax; t++ ) {
+        boolean local = false;
+        BooleanGenome vc = new BooleanGenome( instance );
+        while ( !local ) {
+            BooleanGenome vn = vc.getBestNeighbor();
+            if ( vn.getFitness() < vc.getFitness() ) {
+                vc = vn;
+                if ( vc.getFitness() < bestFitness ) {
+                    best = vc;
+                    bestFitness = vc.getFitness();
                 }
-                local = true;
             }
-            if ( !local ) {
-                System.out.println( best );
-                return;
+            else {
+                local = true;
             }
         }
     }
-}
+    long elapsedTime = System.currentTimeMillis() - startTime;
+    System.out.println( "\nHill Climbing ran for " + elapsedTime + " milliseconds" );
+    System.out.println( "Best Fitness: " + bestFitness );
+    System.out.println( best );
 
+}
 """
 class SATDescent:
     @staticmethod
-    def optimize(tMax:int):
+    def run(tMax:int, instance:CNFFunction):
         bbest = None
-        bfunction = BooleanFunction();
+        best_fitness = 1e10
 
         for i in tqdm(range(tMax)):
             blocal = False
+            vc = BooleanGenome(instance)
             while(not blocal):
-                vc = BooleanGenome(4, bfunction)
-                if(vc.value):
-                    break
                 vn = vc.best_neighbor()
+                
+                if(vn.fitness() < vc.fitness()):
+                    vc = vn
+                    if(vc.fitness() < best_fitness):
+                        bbest = vc
+                        best_fitness = vc.fitness()
+                else:
+                    blocal = True
+        
+        print("Hill Climbing")
+        print(best_fitness)
+        print(bbest)
 
-                if(vn is not None):
-                    bbest = vn
-                    break
-                blocal = True
-            if(not blocal):
-                if (bbest is not None):
-                    print(bbest)
-
-                return

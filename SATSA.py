@@ -21,35 +21,29 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 """
 
-from math import exp
-from random import random
+# from CNFFunction import CNFFunction
 from tqdm import tqdm
-from TSPInstance import TSPInstance
-from PermutationGenome import PermutationGenome
+from BooleanGenome import BooleanGenome, CNFFunction
+from random import random
+from math import exp
 
-class TSPA:
-
+class SATSA:
 
     """
-    public void run( int tMax, TSPInstance instance ) {
+    public void run( int tMax, CNFFunction instance ) {
 
-        PermutationGenome best = null;
+        BooleanGenome best = null;
         int bestFitness = Integer.MAX_VALUE;
-        int temperature = tMax + 1;
+        double temperature = tMax + 1;
         long startTime = System.currentTimeMillis();
-        PermutationGenome vc = new PermutationGenome( 52, instance );
+        BooleanGenome vc = new BooleanGenome( instance );
 
         for ( int t = 0; t < tMax; t++ ) {
-            vc.twoOpt();
-            for ( int i = 0; i < 1000; i++ ) {
-
-                if ( vc.getFitness() == 7542 ) {
-                    break;
-                }
-                PermutationGenome vn = vc.getRandomNeighbor();
-                vn.twoOpt();
+            for ( int i = 0; i < 10000; i++ ) {
+                BooleanGenome vn = vc.getRandomNeighbor();
                 if ( vn.getFitness() < vc.getFitness() ) {
                     vc = vn;
                     if ( vc.getFitness() < bestFitness ) {
@@ -71,21 +65,17 @@ class TSPA:
         System.out.println( "Best Fitness: " + bestFitness );
         System.out.println( best );
     }
-    """
+    """    
     @staticmethod
-    def run(tMax:int, instance:TSPInstance):
+    def run(tMax:int, instance:CNFFunction):
         best = None
         best_fitness = 1e10
-        temperature = tMax + 1
-        vc = PermutationGenome.from_instance(52, instance)
+        temperature = tMax+1
+        vc = BooleanGenome(instance)
 
         for t in tqdm(range(tMax)):
-            vc.two_opt()
-            
-            for i in range(1000):
-                if vc.fitness == 7542 :  break
-                vn = vc.random_neighbor() #best_neighbor()
-                vn.two_opt()
+            for i in range(10000):
+                vn = vc.random_neighbor()
                 if(vn.fitness() < vc.fitness()):
                     vc = vn
                     if(vc.fitness() < best_fitness):
@@ -95,14 +85,9 @@ class TSPA:
                     diff = vc.fitness() - vn.fitness()
                     if(random() < exp(diff/temperature)):
                         vc = vn
-            
             temperature-=1
-    
+
         print("Simulated Annealing")
         print(best_fitness)
         print(best)
-
-if __name__ == "__main__":
-    tsp_instance = TSPInstance("berlin52.tsp")
-    tsp_instance.read_data()
-    TSPA.run(50, tsp_instance)
+        

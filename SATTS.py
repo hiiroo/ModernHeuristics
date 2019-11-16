@@ -21,38 +21,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 """
 
-from sys import maxsize
-from time import time
 from tqdm import tqdm
-from TSPInstance import TSPInstance
-from PermutationGenome import PermutationGenome
+from BooleanGenome import BooleanGenome, CNFFunction
+from random import random
+from math import exp
 
-class TSPTS:
-
+class SATTS:
 
     """
-    public void run( int tMax, TSPInstance instance, int maxTabuSize ) {
+    public void run( int tMax, CNFFunction instance, int maxTabuSize ) {
         long startTime=System.currentTimeMillis();
-        PermutationGenome vc = new PermutationGenome( 52, instance );
-        vc.twoOpt();
-        List<AbstractMap.SimpleEntry<Integer,Integer>> tabuList = new ArrayList<>();
-//        tabuList.add( vc.getFitness() );
-        PermutationGenome best = vc;
+        BooleanGenome vc = new BooleanGenome( instance );
+        List<Integer> tabuList = new ArrayList<>();
+        BooleanGenome best = vc;
         int bestFitness = vc.getFitness();
 
         for ( int t = 0; t < tMax; t++ ) {
-            PermutationGenome bestNeighbor = vc.getRandomNeighborNotInTabu(50,tabuList);
+            BooleanGenome bestNeighbor = vc.getRandomNeighborNotInTabu(50,tabuList);
 
             vc = bestNeighbor;
-            vc.twoOpt();
             if ( vc.getFitness() < bestFitness ) {
                 bestFitness = vc.getFitness();
                 best = vc;
-            }
-            if ( vc.getFitness() == 7542 ) {
-                break;
+                if ( bestFitness==0) break;
             }
             if ( tabuList.size() > maxTabuSize ) {
                 tabuList.remove( 0 );
@@ -63,38 +57,27 @@ class TSPTS:
         System.out.println( "Best Fitness: " + bestFitness );
         System.out.println( best );
     }
-    """
+    """    
     @staticmethod
-    def run(tMax:int, instance:TSPInstance, max_tabu_size:int):
-        
-        vc = PermutationGenome.from_instance(52, instance)
-        vc.two_opt()
-        tabu_list = {}
+    def run(tMax:int, instance:CNFFunction, max_tabu_size):
+        vc = BooleanGenome(instance)
+        tabu_list = []
         best = vc
         best_fitness = vc.fitness()
-        
+
         for t in tqdm(range(tMax)):
             best_neighbor = vc.random_neighbor_not_in_tabu(50, tabu_list)
-
             vc = best_neighbor
-            vc.two_opt()
-            
+
             if(vc.fitness() < best_fitness):
                 best_fitness = vc.fitness()
                 best = vc
-
-            if(vc.fitness() == 7542):
-                break
-
+                if(best_fitness == 0):
+                    break
             if(len(tabu_list) > max_tabu_size):
                 del tabu_list[0]
 
         print("Tabu Search")
         print(best_fitness)
         print(best)
-
-if __name__ == "__main__":
-    tsp_instance = TSPInstance("berlin52.tsp")
-    tsp_instance.read_data()
-    TSPTS.run(50, tsp_instance, 400)
         
