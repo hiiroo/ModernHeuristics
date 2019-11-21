@@ -176,19 +176,18 @@ class SATGA:
         return matingPool;
     }
     """
-
     def tournament_selection(self, tournament_size: int, population_size: int) -> List[BooleanGenome]:
         mating_pool: List[BooleanGenome] = []
 
         for i in range(population_size):
-            best_fitness = 1e10
-            best_candidate: BooleanGenome = None
-
-            for j in range(tournament_size):
+            index = randint(0, tournament_size)
+            best_candidate = self.population[index]
+            
+            for j in range(tournament_size-1):
                 index = randint(0, tournament_size)
                 curr = self.population[index]
-                if(curr.fitness() < best_fitness):
-                    best_fitness = curr.fitness()
+                
+                if(curr.fitness() < best_candidate.fitness()):
                     best_candidate = curr
 
             mating_pool.append(best_candidate)
@@ -234,6 +233,11 @@ class SATGA:
             gene = BooleanGenome(instance)
             self.population.append(gene)
 
+        best:BooleanGenome = self.population[0]
+        for pop_gene in self.population:
+            if(pop_gene.fitness() < best.fitness()):
+                best = BooleanGenome.from_BooleanGenome(pop_gene)
+
         for i in tqdm(range(n_generations)):
             mating_pool = self.tournament_selection(10, population_size)
 
@@ -254,17 +258,14 @@ class SATGA:
                     if(random() < mutation_rate):
                         self.population[pop_count].flip_gene(gene_count)
 
-            best_fitness = 1e10
-            best: BooleanGenome = None
             for pop_count in range(len(self.population)):
-                if(self.population[pop_count].fitness() < best_fitness):
-                    best_fitness = self.population[pop_count].fitness()
-                    best = self.population[pop_count]
+                if(self.population[pop_count].fitness() < best.fitness()):
+                    best = BooleanGenome.from_BooleanGenome(self.population[pop_count])
 
             del self.population[randint(0, len(self.population)-1)]
             self.population.append(best)
 
-            if(best_fitness == 0):
+            if(best.fitness() == 0):
                 break
 
         for pop_count in range(len(self.population)):

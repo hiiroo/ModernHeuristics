@@ -192,7 +192,7 @@ class BooleanGenome:
     def from_BooleanGenome(cls, g:BooleanGenome):
         ng = cls(g._function)
         ng._genes = g._genes[:] # This will copy all elements and create a new list
-        ng._is_changed = False
+        ng._is_changed = g._is_changed #False
         ng._fitness = g._fitness
         return ng
 
@@ -338,8 +338,8 @@ class BooleanGenome:
         genes[i]=!genes[i];
     }
     """
-    def flip_gene(self, i:int):
-        self._genes[i] = not self._genes[i]
+    def flip_gene(self, index:int):
+        self._genes[index] = not self._genes[index]
         self._is_changed = True
 
     """
