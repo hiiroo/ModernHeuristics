@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from __future__ import annotations
 from typing import List
 
 class ZOKSInstance:
@@ -30,21 +31,22 @@ class ZOKSInstance:
     def __init__(self, problem_name:str):
         self._n = 0
         self._capacity = 0
-        self._profit = [int]
-        self._weight = [int]
+        self._profit:List[int] = []
+        self._weight:List[int] = []
+        self.read_data(problem_name)
 
     def read_data(self, problem_name:str):
         try:
             with open(problem_name, "r") as data_file:
                 data_lines:List[str] = data_file.readlines()
 
-                _n, _capacity = data_lines[0].split()
-                _profit, _weight = [int], [int]
+                self._n, self._capacity = map(int, data_lines[0].split())
+                self._profit, self._weight = [], []
 
-                for data_line in range(data_lines[1:]):
-                    line_profit, line_capacity = data_line.split()
-                    _profit.append(line_profit)
-                    _weight.append(line_capacity)
+                for data_line in data_lines[1:-1]:
+                    line_profit, line_capacity = map(int, data_line.split())
+                    self._profit.append(line_profit)
+                    self._weight.append(line_capacity)
         except FileNotFoundError:
             print("File cannot be opened.")
         
@@ -54,7 +56,7 @@ class ZOKSInstance:
         return self._n
 
     @n.setter
-    def n(self, value):
+    def n(self, value:int):
         pass
 
     @property
@@ -62,7 +64,7 @@ class ZOKSInstance:
         return self._capacity
 
     @capacity.setter
-    def capacity(self, value):
+    def capacity(self, value:int):
         pass
 
     @property
@@ -70,7 +72,7 @@ class ZOKSInstance:
         return self._profit
 
     @profit.setter
-    def profit(self, value):
+    def profit(self, value:List[int]):
         pass
 
     @property
@@ -78,7 +80,7 @@ class ZOKSInstance:
         return self._weight
 
     @weight.setter
-    def weight(self, value):
+    def weight(self, value:List[int]):
         pass
 
 

@@ -26,7 +26,7 @@ SOFTWARE.
 from __future__ import annotations
 from typing import List
 from enum import Enum
-from random import randint
+from random import randint, random
 from ZOKSInstance import ZOKSInstance
 
 class FitnessMode(Enum):
@@ -37,6 +37,9 @@ class FitnessMode(Enum):
 
 
 class BooleanGenome:
+
+    fitness_mode:FitnessMode = FitnessMode.Regular
+    penalty_value:int = 10
 
     """
     public BooleanGenome( ZOKSInstance instance ) {
@@ -56,34 +59,59 @@ class BooleanGenome:
     }
     """
     def __init__(self, instance:ZOKSInstance):
-        self._genes = [bool(randint(0, 1)) if True else False for i in range(function.n_variables)]
-        self._function = function
-        self._fitness = None
-        self._is_changed = True
+        self._weight:int = 0
+        self._profit:int = 0
+        self._genes:List[bool] = [False for i in range(instance.n)]
+        for i in range(len(self._genes)):
+            if(random() < 0.5):
+                if(self._weight + instance.weight[i] <= instance.capacity):
+                    self._genes[i] = True
+                    self._weight += instance.weight[i]
+                    self._profit += instance.profit[i]
+                    
+        self._instance = instance
+        self._is_changed = False
 
 
     """
-    public BooleanGenome(BooleanGenome g) {
-        genes = Arrays.copyOf( g.genes, g.genes.length);
-        function = g.function;
+    public BooleanGenome( BooleanGenome g ) {
+        genes = Arrays.copyOf( g.genes, g.genes.length );
+        instance = g.instance;
+        changed = g.changed;
+        profit = g.profit;
     }
     """
     @classmethod
     def from_BooleanGenome(cls, g:BooleanGenome):
-        ng = cls(g._function)
+        ng = cls(g._instance)
         ng._genes = g._genes[:] # This will copy all elements and create a new list
+        # ng._instance = g._instance
         ng._is_changed = g._is_changed #False
-        ng._fitness = g._fitness
+        ng._profit = g._profit
         return ng
 
-    """
-    public int getSize() {
-        return genes.length;
-    }
-    """
     @property
-    def size(self):
-        return len(self._genes)
+    def weight(self)->int:
+        return self._weight
+
+    # def __len__(self):
+    #     return len(self._genes)
+
+    def get_gene(self, i:int)->bool:
+        return self._genes[i]
+
+    def set_gene(self, i:int, value:bool):
+        self._genes[i] = value
+        self._is_changed = True
+
+    # """
+    # public int getSize() {
+    #     return genes.length;
+    # }
+    # """
+    # @property
+    # def size(self):
+    #     return len(self._genes)
 
     """
     public boolean getValue() {
@@ -97,15 +125,6 @@ class BooleanGenome:
     @value.setter
     def value_setter(self, v):
         pass
-
-    # @property
-    def get_gene(self, i:int)->bool:
-        return self._genes[i]
-
-    # @gene.setter
-    def set_gene(self, i:int, value:bool):
-        self._genes[i] = value
-        self._is_changed = True
 
     def __len__(self):
         return len(self._genes)
@@ -147,73 +166,6 @@ class BooleanGenome:
         return best
 
     """
-    BooleanGenome getRandomNeighbor() {
-        Random r = new Random();
-        BooleanGenome n = new BooleanGenome( this );
-        n.flipGene( r.nextInt( genes.length ) );
-        return n;
-    }
-    """
-    def random_neighbor(self)->BooleanGenome:
-        n = BooleanGenome.from_BooleanGenome(self)
-        n.flip_gene(randint(0, len(self._genes)-1))
-        return n
-
-    """
-    BooleanGenome getRandomNeighborNotInTabu( int nTries, List<Integer> tabuList ) {
-            int bestNeighborFitness = Integer.MAX_VALUE;
-            BooleanGenome best = null;
-            Random r = new Random();
-
-            int bestPos = 0;
-            for ( int i = 0; i < nTries; i++ ) {
-                BooleanGenome n = new BooleanGenome( this );
-                int pos;
-                while ( true ) {
-                    pos = r.nextInt( genes.length );
-                    if ( !tabuList.contains( pos ) ) {
-                        break;
-                    }
-                }
-
-                n.flipGene(pos);
-                int newfitness = n.getFitness();
-                if ( newfitness < bestNeighborFitness ) {
-                    bestNeighborFitness = newfitness;
-                    best = n;
-                    bestPos = pos;
-                }
-
-            }
-            tabuList.add( bestPos ) ;
-            return best;
-        }
-    }
-    """
-    def random_neighbor_not_in_tabu(self, nTries:int, tabuList:List)->BooleanGenome:
-        best_neighbor_fitness = 1e10
-        best = None
-
-        best_pos = 0
-        for i in range(nTries):
-            n = BooleanGenome.from_BooleanGenome(self)
-            pos = 0
-            while True:
-                pos = randint(0, len(self._genes)-1)
-                if pos not in tabuList:
-                    break
-            
-            n.flip_gene(pos)
-            new_fitness = n.fitness()
-            if(new_fitness < best_neighbor_fitness):
-                best_neighbor_fitness = new_fitness
-                best = n
-                best_pos = pos
-
-        tabuList.append(best_pos)
-        return best
-
-    """
     private void flipGene( int i ) {
         genes[i]=!genes[i];
     }
@@ -225,32 +177,95 @@ class BooleanGenome:
     """
     int getFitness() {
         if ( changed ) {
-            fitness = 0;
-            for ( int i = 0; i < function.getnClauses(); i++ ) {
-                if ( !function.getClauseValue( i, genes ) ) {
-                    fitness++;
+            profit = 0;
+            weight = 0;
+            for ( int i = 0; i < instance.getNItems(); i++ ) {
+                if ( getGene( i ) ) {
+                    profit += instance.getProfit( i );
+                    weight += instance.getWeight( i );
                 }
             }
         }
-        return fitness;
+
+        if ( weight > instance.getCapacity() ) { //infeasible
+            if ( fitnessMode == FitnessMode.Regular ) {
+                return profit;
+            }
+            if ( fitnessMode == FitnessMode.DeathPenalty ) {
+                return Integer.MIN_VALUE;
+            }
+            if ( fitnessMode == FitnessMode.Penalty ) {
+                return profit - (weight - instance.getCapacity()) * penaltyValue;
+            }
+            if ( fitnessMode == FitnessMode.Repair ) {
+                Random rnd = new Random();
+                while ( weight > instance.getCapacity() ) { //remove a random item
+                    int index = rnd.nextInt( genes.length );
+                    if ( getGene( index )) {
+                        genes[ index ] = false;
+                        weight -= instance.getWeight( index );
+                        profit -= instance.getProfit(index );
+                    }
+                }
+            }         
+        }
+        return profit;
+
     }
     """
-    def fitness(self):
+    def fitness(self)->int:
         if(self._is_changed):
-            self._fitness = 0
-            for i in range(self._function.n_clauses):
-                if(not self._function.clause_value(i, self._genes)):
-                    self._fitness += 1
+            self._profit = 0
+            self._weight = 0
+            for i in range(self._instance.n):
+                if(self.get_gene(i)):
+                    self._profit += self._instance.profit[i]
+                    self._weight += self._instance.weight[i]
+
+        if(self._weight > self._instance.capacity):
+            if(self.fitness_mode == FitnessMode.Regular):
+                return self._profit
+
+            if(self.fitness_mode == FitnessMode.DeathPenalty):
+                return -1e10
+
+            if(self.fitness_mode == FitnessMode.Penalty):
+                return self._profit - (self._weight - self._instance.capacity)*self.penalty_value
+
+            if(self.fitness_mode == FitnessMode.Repair):
+                while(self._weight > self._instance.capacity):
+                    index:int = randint(0, len(self._genes)-1)
+                    if(self.get_gene(index)):
+                        self._genes[index] = False
+                        self._weight -= self._instance.weight[index]
+                        self._profit -= self._instance.profit[index]
         
-        return self._fitness
+        return self._profit
 
     """
-    boolean isSatisfied() {
-        return getFitness() == 0;
+    public boolean isFeasible() {
+        getFitness();
+        return weight <= instance.getCapacity();
     }
     """
-    def is_satisfied(self)->bool:
-        return self._fitness == 0
+    def is_feasible(self)->bool:
+        self.fitness()
+        return self._weight <= self._instance.capacity
 
+    """
+    public boolean isBetter( BooleanGenome rhs ) {
+        if ( this.isFeasible() && rhs.isFeasible() ) {
+            return profit > rhs.profit;
+        }
+        if ( !this.isFeasible() && !rhs.isFeasible() ) {
+            return (weight - instance.getCapacity()) < (rhs.weight - instance.getCapacity());
+        }
 
-
+        return this.isFeasible();
+    }
+    """
+    def is_better(self, rhs:BooleanGenome)->bool:
+        if(self.is_feasible() and rhs.is_feasible()):
+            return self._profit > rhs._profit
+        if(not self.is_feasible() and not rhs.is_feasible()):
+            return (self.weight - self._instance.capacity) < (rhs.weight - self._instance.capacity)
